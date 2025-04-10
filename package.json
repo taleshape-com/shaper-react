@@ -2,7 +2,11 @@
   "name": "shaper-react",
   "private": true,
   "version": "0.1.0",
-	"license": "MIT",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taleshape-com/shaper-react.git"
+  },
   "type": "module",
   "files": [
     "dist"

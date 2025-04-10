@@ -1,2 +1,2 @@
-# Shaper React SDK
+# Shaper React Embedding SDK
 
