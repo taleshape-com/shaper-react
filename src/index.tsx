@@ -1,35 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 // Type definitions
 type VarsParamSchema = Record<string, string | string[]> | undefined;
 
-export type DashboardProps = {
+type ShaperDashboardProps = {
   baseUrl: string;
   dashboardId: string;
   getJwt: (args: { baseUrl?: string }) => Promise<string>;
 } & (
-    | {
+  | {
       vars: VarsParamSchema;
       onVarsChanged: (newVars: VarsParamSchema) => void;
       defaultVars?: undefined;
     }
-    | {
+  | {
       vars?: undefined;
       onVarsChanged?: (newVars: VarsParamSchema) => void;
       defaultVars?: VarsParamSchema;
     }
-  );
+);
 
 // Define a type for the global window object with our custom properties
 declare global {
   interface Window {
     shaper?: {
-      Dashboard?: React.ComponentType<DashboardProps>;
+      Dashboard?: React.ComponentType<ShaperDashboardProps>;
     };
   }
 }
-
-export const ShaperDashboard: React.FC<DashboardProps> = (props) => {
+const ShaperDashboard: React.FC<ShaperDashboardProps> = (props) => {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
 
@@ -48,15 +47,15 @@ export const ShaperDashboard: React.FC<DashboardProps> = (props) => {
 
     if (existingScript) {
       // Script is already in the DOM, wait for it to load
-      existingScript.addEventListener('load', () => {
+      existingScript.addEventListener("load", () => {
         setScriptLoaded(true);
       });
-      existingScript.addEventListener('error', () => {
+      existingScript.addEventListener("error", () => {
         setScriptError(`Failed to load Shaper script from ${scriptUrl}`);
       });
     } else {
       // Create and append the script
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = scriptUrl;
       script.async = true;
 
@@ -82,10 +81,16 @@ export const ShaperDashboard: React.FC<DashboardProps> = (props) => {
   }
 
   if (!scriptLoaded || !window.shaper?.Dashboard) {
-    return <div className="shaper-dashboard-loading">Loading Shaper Dashboard...</div>;
+    return (
+      <div className="shaper-dashboard-loading">
+        Loading Shaper Dashboard...
+      </div>
+    );
   }
 
   // Once loaded, use the global Dashboard component
   const ShaperDashboardComponent = window.shaper.Dashboard;
   return <ShaperDashboardComponent {...props} />;
 };
+
+export { ShaperDashboard, type ShaperDashboardProps };
