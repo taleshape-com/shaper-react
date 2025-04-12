@@ -8,7 +8,7 @@ type EmbedProps = {
   getJwt: (args: { baseUrl?: string }) => Promise<string>;
   vars?: VarsParamSchema;
   onVarsChanged?: (newVars: VarsParamSchema) => void;
-}
+};
 
 type EmbedArgs = EmbedProps & {
   container: HTMLElement;
@@ -17,7 +17,7 @@ type EmbedArgs = EmbedProps & {
 type DashboardInstance = {
   update: (newProps: Partial<EmbedProps>) => void;
   destroy: () => void;
-}
+};
 
 // Define a type for the global window object with our custom properties
 declare global {
@@ -28,14 +28,41 @@ declare global {
   }
 }
 
-type ShaperDashboardProps = EmbedProps & Required<Pick<EmbedProps, 'baseUrl'>>;
+type ShaperDashboardProps = {
+  id: string;
+  baseUrl: string;
+  jwt?: string;
+  refreshJwt: () => void;
+} & Pick<EmbedProps, "vars" | "onVarsChanged">;
 
-const ShaperDashboard = (props: ShaperDashboardProps) => {
+function ShaperDashboard({
+  id,
+  baseUrl,
+  jwt,
+  refreshJwt,
+  vars,
+  onVarsChanged,
+}: ShaperDashboardProps) {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const [scriptError, setScriptError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dashboardRef = useRef<DashboardInstance | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  const getJwtResolveRef = useRef<((jwt: string) => void)[]>([]);
+  const refreshRef = useRef<() => void>(() => { });
+
+  useEffect(() => {
+    refreshRef.current = refreshJwt;
+  }, [refreshJwt]);
+
+  useEffect(() => {
+    if (jwt) {
+      for (const resolve of getJwtResolveRef.current) {
+        resolve(jwt);
+      }
+      getJwtResolveRef.current = [];
+    }
+  }, [jwt]);
+
 
   useEffect(() => {
     // Check if the script is already loaded
@@ -45,7 +72,7 @@ const ShaperDashboard = (props: ShaperDashboardProps) => {
     }
 
     // Construct the script URL
-    const scriptUrl = `${props.baseUrl}/embed/shaper.js`;
+    const scriptUrl = `${baseUrl}/embed/shaper.js`;
 
     // Check if the script is already being loaded
     const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
@@ -75,24 +102,32 @@ const ShaperDashboard = (props: ShaperDashboardProps) => {
       document.body.appendChild(script);
     }
 
-    // Cleanup function
-    return () => {
-      // We don't remove the script as other components might be using it
-    };
-  }, [props.baseUrl]);
+    // We don't remove the script as other components might be using it
+  }, [baseUrl]);
 
   // Initialize the dashboard
   useEffect(() => {
-    if (!(window.shaper?.dashboard) || !containerRef.current || dashboardRef.current) {
+    if (
+      !scriptLoaded ||
+      !window.shaper?.dashboard ||
+      !containerRef.current ||
+      dashboardRef.current
+    ) {
       return;
     }
 
     dashboardRef.current = window.shaper.dashboard({
+      baseUrl,
       container: containerRef.current,
-      ...props,
+      dashboardId: id,
+      getJwt: async () => {
+        const p = new Promise<string>((resolve) => {
+          getJwtResolveRef.current.push(resolve);
+        });
+        refreshRef.current();
+        return p;
+      },
     });
-
-    setIsReady(true);
 
     // Cleanup function
     return () => {
@@ -101,29 +136,24 @@ const ShaperDashboard = (props: ShaperDashboardProps) => {
         dashboardRef.current = null;
       }
     };
-  }, [props]);
+  }, [scriptLoaded, baseUrl, id]);
 
   // Update props when they change
   useEffect(() => {
-    if (!isReady || !dashboardRef.current) {
+    if (!dashboardRef.current) {
       return;
     }
-    dashboardRef.current.update(props);
-  }, [props, isReady]);
+    dashboardRef.current.update({
+      vars,
+      onVarsChanged,
+    });
+  }, [vars, onVarsChanged]);
 
   if (scriptError) {
     return <div className="shaper-dashboard-error">Error: {scriptError}</div>;
   }
 
-  if (!scriptLoaded || !window.shaper?.dashboard) {
-    return (
-      <div className="shaper-dashboard-loading">
-        Loading Shaper Dashboard...
-      </div>
-    );
-  }
-
   return <div ref={containerRef} />;
-};
+}
 
 export { ShaperDashboard, type ShaperDashboardProps };
