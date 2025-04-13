@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 
-type VarsParamSchema = Record<string, string | string[]> | undefined;
+type ShaperDashboardVars = Record<string, string | string[]> | undefined;
 
 type EmbedProps = {
   baseUrl?: string;
   dashboardId: string;
   getJwt: (args: { baseUrl?: string }) => Promise<string>;
-  vars?: VarsParamSchema;
-  onVarsChanged?: (newVars: VarsParamSchema) => void;
+  vars?: ShaperDashboardVars;
+  onVarsChanged?: (newVars: ShaperDashboardVars) => void;
 };
 
 type EmbedArgs = EmbedProps & {
@@ -47,8 +47,11 @@ function ShaperDashboard({
   const [scriptError, setScriptError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dashboardRef = useRef<DashboardInstance | null>(null);
-  const getJwtResolveRef = useRef<((jwt: string) => void)[]>([]);
+  const resolveJwtRef = useRef<((jwt: string) => void)[]>([]);
   const refreshRef = useRef<() => void>(() => { });
+  const varsRef = useRef<ShaperDashboardVars>(undefined);
+  const varsJsonRef = useRef<string | undefined>(undefined);
+  const onVarsChangedRef = useRef<((vars: ShaperDashboardVars) => void) | undefined>(undefined);
 
   useEffect(() => {
     refreshRef.current = refreshJwt;
@@ -56,10 +59,10 @@ function ShaperDashboard({
 
   useEffect(() => {
     if (jwt) {
-      for (const resolve of getJwtResolveRef.current) {
+      for (const resolve of resolveJwtRef.current) {
         resolve(jwt);
       }
-      getJwtResolveRef.current = [];
+      resolveJwtRef.current = [];
     }
   }, [jwt]);
 
@@ -104,6 +107,25 @@ function ShaperDashboard({
     // We don't remove the script as other components might be using it
   }, [baseUrl]);
 
+  // Update props when they change
+  useEffect(() => {
+    const s = JSON.stringify(vars)
+    if (s === varsJsonRef.current) {
+      return;
+    }
+    varsRef.current = vars;
+    varsJsonRef.current = s;
+    if (dashboardRef.current) {
+      dashboardRef.current.update({
+        vars,
+      });
+    }
+  }, [vars]);
+
+  useEffect(() => {
+    onVarsChangedRef.current = onVarsChanged;
+  }, [onVarsChanged]);
+
   // Initialize the dashboard
   useEffect(() => {
     if (
@@ -121,11 +143,17 @@ function ShaperDashboard({
       dashboardId: id,
       getJwt: async () => {
         const p = new Promise<string>((resolve) => {
-          getJwtResolveRef.current.push(resolve);
+          resolveJwtRef.current.push(resolve);
         });
         refreshRef.current();
         return p;
       },
+      vars: varsRef.current,
+      onVarsChanged: (newVars) => {
+        if (onVarsChangedRef.current) {
+          onVarsChangedRef.current(newVars);
+        }
+      }
     });
 
     // Cleanup function
@@ -137,17 +165,6 @@ function ShaperDashboard({
     };
   }, [scriptLoaded, baseUrl, id]);
 
-  // Update props when they change
-  useEffect(() => {
-    if (!dashboardRef.current) {
-      return;
-    }
-    dashboardRef.current.update({
-      vars,
-      onVarsChanged,
-    });
-  }, [vars, onVarsChanged]);
-
   if (scriptError) {
     return <div className="shaper-dashboard-error">Error: {scriptError}</div>;
   }
@@ -155,4 +172,4 @@ function ShaperDashboard({
   return <div ref={containerRef} />;
 }
 
-export { ShaperDashboard, type ShaperDashboardProps };
+export { ShaperDashboard, type ShaperDashboardProps, type ShaperDashboardVars };
