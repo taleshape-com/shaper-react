@@ -2,11 +2,16 @@
 
 Embed [Shaper](https://taleshape.com) components in your React app
 
----
 
 ## Usage
 
 See the [react router example app](https://github.com/taleshape-com/shaper-react-example) for a complete example app.
+
+### Installation
+
+```bash
+npm install shaper-react
+```
 
 
 ### Basic Example
@@ -14,7 +19,8 @@ See the [react router example app](https://github.com/taleshape-com/shaper-react
 ```tsx
 import { ShaperDashboard } from "shaper-react";
 
-// in your component:
+// In your component
+
 <ShaperDashboard
   baseUrl={"http://localhost:5454"}
   id={"your-dashboard-id"}
@@ -32,19 +38,23 @@ import { ShaperDashboard } from "shaper-react";
 // The ID of the dashboard to embed.
 // Get this from the Shaper UI.
 id: string;
+
 // The base URL of the Shaper instance.
 // Must be reachable from the user's browser.
 baseUrl: string;
+
 // JWT token for authentication.
 // Dashboard can only load with a valid JWT.
 // Dashboard is in loading state if jwt is undefined.
 // This allows you to load the token asynchronously.
 // Make sure you generate a token that matches the permissions of the logged in user.
 jwt?: string;
+
 // This function is called when the JWT token needs to be refreshed.
 // It is also called initially if jwt prop is undefined.
 // Use this as trigger to load the token and then set the jwt prop accordingly.
 refreshJwt: () => void;
+
 // Optional object of variables passed to the dashboard.
 // Values must be strings or arrays of strings.
 // Can be used in SQL via `getvariable()` function.
@@ -52,9 +62,11 @@ refreshJwt: () => void;
 // This is useful if you like to store the dashboard state in the URL or local storage for example.
 // Use this in combination with the onVarsChanged callback to update the vars as needed.
 vars?: ShaperDashboardVars;
+
 // Optional callback that is called when the dashboard's variables change.
 // Also see vars prop.
 onVarsChanged?: (newVars: ShaperDashboardVars) => void;
+
 // Optional callback that is called when embed JS script cannot be loaded from the Shaper instance.
 // Use this to render an error message or a fallback UI.
 // By default an empty div is rendered.
