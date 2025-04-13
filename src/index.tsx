@@ -63,7 +63,6 @@ function ShaperDashboard({
     }
   }, [jwt]);
 
-
   useEffect(() => {
     // Check if the script is already loaded
     if (window.shaper?.dashboard) {
