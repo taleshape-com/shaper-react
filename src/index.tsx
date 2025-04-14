@@ -81,10 +81,16 @@ export function ShaperDashboard({
   const varsRef = useRef<ShaperDashboardVars>(undefined);
   const varsJsonRef = useRef<string | undefined>(undefined);
   const onVarsChangedRef = useRef<((vars: ShaperDashboardVars) => void) | undefined>(undefined);
+  const onLoadErrorRef = useRef(onLoadError);
 
   useEffect(() => {
     refreshRef.current = refreshJwt;
   }, [refreshJwt]);
+
+  useEffect(() => {
+    onLoadErrorRef.current = onLoadError;
+  }, [onLoadError]);
+
 
   useEffect(() => {
     if (jwt) {
@@ -114,7 +120,7 @@ export function ShaperDashboard({
         setScriptLoaded(true);
       });
       existingScript.addEventListener("error", () => {
-        onLoadError(`Failed to load Shaper script from ${scriptUrl}`);
+        onLoadErrorRef.current(`Failed to load Shaper script from ${scriptUrl}`);
       });
     } else {
       // Create and append the script
@@ -127,7 +133,7 @@ export function ShaperDashboard({
       };
 
       script.onerror = () => {
-        onLoadError(`Failed to load Shaper script from ${scriptUrl}`);
+        onLoadErrorRef.current(`Failed to load Shaper script from ${scriptUrl}`);
       };
 
       document.body.appendChild(script);
