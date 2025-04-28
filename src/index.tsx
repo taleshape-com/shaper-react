@@ -109,7 +109,7 @@ export function ShaperDashboard({
     }
 
     // Construct the script URL
-    const scriptUrl = `${baseUrl}/embed/shaper.js`;
+    const scriptUrl = `${removeTrailingSlash(baseUrl)}/embed/shaper.js`;
 
     // Check if the script is already being loaded
     const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
@@ -203,3 +203,6 @@ export function ShaperDashboard({
   return <div ref={containerRef} />;
 }
 
+function removeTrailingSlash(s: string) {
+  return s.replace(/\/+$/, "");
+}

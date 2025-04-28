@@ -20,9 +20,3 @@ updates:
       github-actions:
         patterns:
           - '*'
-
-  # Keep Docker dependencies up to date
-  - package-ecosystem: 'docker'
-    directory: '/'
-    schedule:
-      interval: 'weekly'
