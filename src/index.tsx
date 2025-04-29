@@ -59,6 +59,8 @@ export type ShaperDashboardProps = {
   // Use this to render an error message or a fallback UI.
   // By default an empty div is rendered.
   onLoadError?: (error: string) => void;
+  // Optional className to be applied to the container div
+  className?: string;
 } & Pick<EmbedProps, "vars" | "onVarsChanged">;
 
 // Component to embed a Shaper dashboard.
@@ -72,6 +74,7 @@ export function ShaperDashboard({
   vars,
   onVarsChanged,
   onLoadError = () => { },
+  className,
 }: ShaperDashboardProps) {
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -200,7 +203,7 @@ export function ShaperDashboard({
     };
   }, [scriptLoaded, baseUrl, id]);
 
-  return <div ref={containerRef} />;
+  return <div ref={containerRef} className={className} />;
 }
 
 function removeTrailingSlash(s: string) {

@@ -71,6 +71,10 @@ onVarsChanged?: (newVars: ShaperDashboardVars) => void;
 // Use this to render an error message or a fallback UI.
 // By default an empty div is rendered.
 onLoadError?: (error: string) => void;
+
+// Optional className to be applied to the container div.
+// Use this to customize the styling of the dashboard container.
+className?: string;
 ```
 
 
