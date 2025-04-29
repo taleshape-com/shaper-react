@@ -1,6 +1,6 @@
 {
   "name": "shaper-react",
-  "version": "0.5.8",
+  "version": "0.5.9",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     }
   },
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "build": "tsc && tsc -p tsconfig.cjs.json && mv dist/cjs/index.js dist/index.cjs && rmdir dist/cjs",
     "lint": "eslint ."
   },
   "peerDependencies": {
