@@ -82,7 +82,7 @@ className?: string;
 
 To authenticate with Shaper, your backend needs to call the Shaper API and get a JWT token.
 
-1. Create an API Key in the Shaper Admin UI and provide it as a secret to your backend. Never send this key to the client.
+1. Create an API Key in the Shaper Admin UI and provide it as a secret to your backend. __Never send this key to the client.__
 2. When the `refreshJwt` callback is called, call your backend and get a new JWT token. By default, tokens are valid for 15 minutes. If a user is active for longer than that, Shaper will call `refreshJwt` again to request a new JWT token.
 3. Send a `POST` request to the `/api/auth/token` Shaper API endpoint. The request body must contain the following JSON data:
    - `token`: The API key you created in step 1.

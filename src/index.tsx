@@ -6,7 +6,7 @@ export type ShaperDashboardVars = Record<string, string | string[]> | undefined;
 type EmbedProps = {
   baseUrl?: string;
   dashboardId: string;
-  getJwt: (args: { baseUrl?: string }) => Promise<string>;
+  getJwt: () => Promise<string>;
   // Optional object of variables passed to the dashboard.
   // Values must be strings or arrays of strings.
   // Can be used in SQL via `getvariable()` function.
